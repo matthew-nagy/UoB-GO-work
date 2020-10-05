@@ -39,6 +39,39 @@ func getNumOfNeighbours(column int, row int, world[][] byte, p golParams) byte{
 	return value
 }
 
+type Data struct{
+	x	int
+	y	int
+	val byte
+}
+
+func getResult(world [][] byte, p golParams, rowNum, colNum int, newWorld[][] byte) {
+	value := getNumOfNeighbours(colNum, rowNum, world, p)
+	if world[rowNum][colNum] == 255{
+		if value < 2 || value > 3{
+			newWorld[rowNum][colNum] = 0
+		}
+	}else if value == 3{
+		newWorld[rowNum][colNum] = 255
+	}
+}
+
+func calculateNextState(p golParams, world [][]byte) [][]byte {
+
+	nextState := [][]byte{}
+	for i:=0; i<p.imageHeight; i++{
+		nextState=append(nextState,make([]byte, p.imageWidth))
+	}
+
+	for rowNum:= 0; rowNum < p.imageWidth; rowNum++{
+		for colNum:=0; colNum < p.imageHeight; colNum++{
+			go getResult(world, p, rowNum, colNum, nextState)
+		}
+	}
+	return nextState
+}
+
+/*
 func calculateNextState(p golParams, world [][]byte) [][]byte {
 
 	nextState := [][]byte{}
@@ -68,7 +101,7 @@ func calculateNextState(p golParams, world [][]byte) [][]byte {
 	//fmt.Println(" ")
 
 	return nextState
-}
+}*/
 
 func calculateAliveCells(p golParams, world [][]byte) []cell {
 	toReturn := []cell{}
