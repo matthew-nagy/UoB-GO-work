@@ -1,19 +1,19 @@
 package main
 
-// import "fmt"
+ //import "fmt"
 
 func getStateOfNeighbour(column int, row int, world[][] byte, width int, height int)bool{
 	if column < 0{
-		return false
+		return getStateOfNeighbour(width -1, row, world, width, height)
 	}
 	if column >= width{
-		return false
+		return getStateOfNeighbour(0, row, world, width, height)
 	}
 	if row < 0{
-		return false
+		return getStateOfNeighbour(column, height -1, world, width, height)
 	}
 	if row >= height{
-		return false
+		return getStateOfNeighbour(column, 0, world, width, height)
 	}
 	if world[row][column] == 0{
 		return false
@@ -47,16 +47,26 @@ func calculateNextState(p golParams, world [][]byte) [][]byte {
 		row := []byte{}
 		for colNum:=0; colNum < p.imageHeight; colNum++{
 			value := getNumOfNeighbours(colNum, rowNum, world, p)
-			if value == 2 || value == 3{
-				row = append(row, 255)
-			} else {
-				row = append(row, 0)
+			if world[rowNum][colNum] == 255{
+				if value == 2 || value == 3{
+					row = append(row, 255)
+				}else{
+					row = append(row, 0)
+				}
+			}else{
+				if value == 3{
+					row = append(row, 255)
+				}else{
+					row = append(row, 0)
+				}
 			}
 		}
 		nextState = append(nextState, row)
 	}
 	
-	nextState[4][4] = 255
+	//VisualiseMatrix(nextState, p.imageWidth, p.imageHeight)
+	//fmt.Println(" ")
+
 	return nextState
 }
 
