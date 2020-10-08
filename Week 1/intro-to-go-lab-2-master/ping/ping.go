@@ -5,21 +5,36 @@ import (
 	"os"
 	"runtime/trace"
 	"time"
+	"fmt"
 )
 
 func foo(channel chan string) {
-	// TODO: Write an infinite loop of sending "pings" and receiving "pongs"
+	fmt.Println("foo: Sending ping")
+	channel <- "ping"
+	val := <- channel
+	for ;val != "pong";{
+		channel <- "ping"
+	}
 
+	fmt.Println("foo: Recieved pong")
+
+	go foo(channel)
 }
 
 func bar(channel chan string) {
-	// TODO: Write an infinite loop of receiving "pings" and sending "pongs"
+	val := <- channel
+	fmt.Println("bar: Recieved ", val)
+	fmt.Println("bar: Sending pong")
+	channel <- "pong"
+
+	go bar(channel)
 }
 
 func pingPong() {
 	// TODO: make channel of type string and pass it to foo and bar
-	go foo(nil) // Nil is similar to null. Sending or receiving from a nil chan blocks forever.
-	go bar(nil)
+	c := make(chan string)
+	go foo(c) // Nil is similar to null. Sending or receiving from a nil chan blocks forever.
+	go bar(c)
 	time.Sleep(500 * time.Millisecond)
 }
 
