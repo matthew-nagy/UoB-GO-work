@@ -28,6 +28,7 @@ func fasterSender(c chan<- []int){
 	}
 }
 
+
 // main starts the two senders and then goes into an infinite loop of receiving their messages.
 func main() {
 	ints := make(chan int, 10)

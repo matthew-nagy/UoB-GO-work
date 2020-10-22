@@ -149,6 +149,8 @@ func main() {
 	for i := 0; i < bankSize; i++ {
 		go executor(&bank, i, transactionQueue, done, lockInfo)
 	}
+		//go executor(&bank, 0, transactionQueue, done, lockInfo)
+
 
 	for total := 0; total < transactions; total++ {
 		fmt.Println("Completed transactions\t", total)

@@ -1,6 +1,7 @@
 package main
 
  //import "fmt"
+ import "sync"
 
 func getStateOfNeighbour(column int, row int, world[][] byte, width int, height int)bool{
 	if column < 0{
@@ -39,9 +40,75 @@ func getNumOfNeighbours(column int, row int, world[][] byte, p golParams) byte{
 	return value
 }
 
+type Pos struct{
+	x, y int
+}
+
+func updateCell(newState *byte, world [][]byte, x, y int, p golParams, wg sync.WaitGroup){
+
+	value := getNumOfNeighbours(x, y, world, p)
+	if world[y][x] == 255{
+		if value == 2 || value == 3{
+			*newState = 255
+		}else{
+			*newState = 0
+		}
+	}else{
+		if value == 3{
+			*newState = 255
+		}else{
+			*newState = 0
+		}
+	}
+
+	wg.Done()
+}
+
+func updateWorker(world [][]byte, newState [][]byte, p golParams, wg sync.WaitGroup, pc chan Pos){
+
+	for q := range pc{
+		wg.Add(1)
+		go updateCell(&(newState[q.y][q.x]), world, q.x, q.y, p, wg)
+	}
+
+	wg.Done();
+}
+
+func calculateNextStateParallel(p golParams, world [][]byte) [][]byte{
+	var nextState [][]byte = make([][]byte, p.imageHeight)
+	var firstGroup sync.WaitGroup
+	var wg sync.WaitGroup
+	const numOfWorkers = 16
+	pc := make(chan Pos)
+	firstGroup.Add(1)
+	go func(){
+		for i := 0; i < numOfWorkers; i++{
+			wg.Add(1)
+			go updateWorker(world, nextState, p, wg, pc)
+		}
+		firstGroup.Done()
+	}()
+
+	for i:=0; i<p.imageHeight; i++{
+		nextState[i] = make([]byte, p.imageWidth)
+	}
+
+	firstGroup.Wait()
+	//At this point, nextState should be all made, and the updateWorkers are all existing
+
+	for i:=0; i<p.imageHeight; i++{
+		for j:=0; j<p.imageWidth; j++{
+			pc <- Pos{x: j, y: i}
+		}
+	}
+	close(pc)
+
+	wg.Wait()
+	return nextState
+}
 
 func calculateNextState(p golParams, world [][]byte) [][]byte {
-
+	//return calculateNextStateParallel(p, world)
 	nextState := [][]byte{}
 
 	for rowNum:= 0; rowNum < p.imageWidth; rowNum++{

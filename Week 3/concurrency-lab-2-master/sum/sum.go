@@ -3,15 +3,16 @@ package main
 import (
 	"fmt"
 	"sync"
+	"sync/atomic"
 )
 
 func main() {
-	sum := 0
+	var sum uint64
 	var wg sync.WaitGroup
 	for i := 0; i < 1000; i++ {
 		wg.Add(1)
 		go func() {
-			sum = sum + 1
+			atomic.AddUint64(&sum, 1)
 			wg.Done()
 		}()
 	}
