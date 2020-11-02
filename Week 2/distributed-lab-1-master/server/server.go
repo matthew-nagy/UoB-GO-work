@@ -22,6 +22,7 @@ func acceptConns(ln net.Listener, conns chan net.Conn) {
 	// and add it to the channel for handling connections.
 	for{
 		conn, err := ln.Accept()
+		fmt.Println("Server has got a connection!")
 		if err != nil{
 			handleError(err)
 		}else{
@@ -42,6 +43,7 @@ func handleClient(client net.Conn, clientid int, msgs chan Message) {
 func main() {
 	// Read in the network port we should listen on, from the commandline argument.
 	// Default to port 8030
+	fmt.Println("Started running")
 	portPtr := flag.String("port", ":8030", "port to listen on")
 	flag.Parse()
 
